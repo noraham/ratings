@@ -21,7 +21,7 @@ def load_users():
     User.query.delete()
 
     # Read u.user file and insert data
-    for row in open("seed_data/u.user"):
+    for i, row in enumerate(open("seed_data/u.user")):
         row = row.rstrip()
         user_id, age, gender, occupation, zipcode = row.split("|")
 
@@ -31,6 +31,9 @@ def load_users():
 
         # We need to add to the session or it won't ever be stored
         db.session.add(user)
+
+        if i % 100 == 0:
+            print i
 
     # Once we're done, we should commit our work
     db.session.commit()
@@ -43,16 +46,19 @@ def load_movies():
 
     Movie.query.delete()
 
-    for row in open("seed_data/u.item"):
+    for i, row in enumerate(open("seed_data/u.item")):
         row = row.strip()
         full_row = row.split("|")
 
+        movie_id = full_row[0]
         title_ugly = full_row[1]
         title_ugly = title_ugly.split()
         if title_ugly[-1][-1] == ")":
             title_pretty = title_ugly[:-1]
+            title =" ".join(title_pretty)
         else:
             title_pretty = title_ugly
+            title =" ".join(title_pretty)
 
         release_ugly = full_row[2]
         if release_ugly:
@@ -62,10 +68,13 @@ def load_movies():
 
         imdb = full_row[4]
 
-        movie = Movie(title=title_pretty, release_at=release_pretty,
+        movie = Movie(movie_id=movie_id, title=title, release_at=release_pretty,
                       imdb_url=imdb)
 
         db.session.add(movie)
+
+        if i % 100 == 0:
+            print i
 
     db.session.commit()
 
@@ -78,12 +87,19 @@ def load_ratings():
     Rating.query.delete()
 
     # Read u.user file and insert data
-    for row in open("seed_data/u.data"):
+    for i, row in enumerate(open("seed_data/u.data")):
         row = row.strip().split("\t")
+        user_id = int(row[0])
+        movie_id = int(row[1])
+        score = int(row[2])
+
         rating = Rating(movie_id=movie_id, user_id=user_id, score=score)
 
         # We need to add to the session or it won't ever be stored
         db.session.add(rating)
+
+        if i % 100 == 0:
+            print i
 
     # Once we're done, we should commit our work
     db.session.commit()
@@ -113,3 +129,4 @@ if __name__ == "__main__":
     load_movies()
     load_ratings()
     set_val_user_id()
+    

@@ -38,7 +38,7 @@ class Movie(db.Model):
     # primary_key has nullable False and auto-increment built-in 
     # since it is type integer
     movie_id = db.Column(db.Integer, primary_key=True) 
-    title = db.Column(db.String(64), nullable=False)
+    title = db.Column(db.String(250), nullable=False)
     release_at = db.Column(db.DateTime, nullable=False)
     imdb_url = db.Column(db.String(200), nullable=True)
    
