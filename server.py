@@ -45,22 +45,50 @@ def form_register():
 
     email = request.form.get("user_email")
     password = request.form.get("password")
+    age = request.form.get("age")
+    zipcode = request.form.get("zipcode")
 
+    tricky_user = User.query.filter_by(email=email).first()
 
-    sql = "SELECT email FROM users WHERE email IS NOT NULL"
-    cursor = db.session.execute(sql)
-
-    insert = "INSERT INTO users(email, password) VALUE (:email, :password)"
-
-    existing_emails = cursor.fetchall()
-    if email in existing_emails:
-        flash('User already exists. Please log in.')
+    if not tricky_user:
+        new_user = User(email=email, password=password, age=age, zipcode=zipcode)
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Successfully Registered!')
         return redirect("/")
     else:
-        db.session.execute(insert, {'email': email, 'password': password})
-        db.session.commit()
+        flash('User already exists. Please log in.')
         return redirect("/")
 
+@app.route("/login")
+def login_form():
+    """Show login form."""
+
+    return render_template("login_form.html")
+
+@app.route("/login_process", methods=["POST"])
+def login():
+    """Check login input"""
+
+    email = request.form.get("user_email")
+    password = request.form.get("password")
+    # saved_password = User.query.filter_by(email=email, password=password).first()
+    real_user = User.query.filter_by(email=email).first()
+    
+
+    if not real_user:
+        flash('User does not exist. Please register.')
+        return redirect("/")
+    else:
+        saved_password = real_user.password
+        user_id = real_user.user_id
+        if password == saved_password:
+            session["user_id"] = user_id
+            flash('Successful login!')
+            return redirect("/users/{}".format(user_id))
+        else:
+            flash('password incorrect')
+            return redirect("/login")
 
 
 if __name__ == "__main__":
